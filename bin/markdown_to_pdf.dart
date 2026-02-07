@@ -57,6 +57,8 @@ Future<void> main(List<String> args) async {
     exit(0);
   }
 
+  final codeBgColour = argResults['code-bg-colour'] as String?;
+
   // Retrieve positional arg (input file)
   final inputPath = argResults.rest.first;
   final inputFile = File(inputPath);
@@ -68,17 +70,24 @@ Future<void> main(List<String> args) async {
   final markdownContent = await inputFile.readAsString();
   // ------------------  Convert markdown → PDF widgets (new engine)  ------------------
   // The `useNewEngine` flag activates the browser‑rendering engine.
+  final tagStyle = codeBgColour != null
+      ? HtmlTagStyle(codeBlockBackgroundColor: PdfColor.fromHex(codeBgColour))
+      : const HtmlTagStyle();
   final List<pw.Widget> pdfWidgets;
   try {
-    pdfWidgets =
-        await HTMLToPdf().convertMarkdown(markdownContent, useNewEngine: true);
+    pdfWidgets = await HTMLToPdf().convertMarkdown(
+      markdownContent,
+      useNewEngine: true,
+      tagStyle: tagStyle,
+    );
   } catch (e, st) {
-    stderr.writeln('Conversion failed: $e');
+    stderr.writeln('Conversion failed: $e $st');
     // Optionally you could print the stack trace for debugging:
     // stderr.writeln(st);
     exit(2);
   }
-  // ---------------------------  Build PDF document  ---------------------------
+
+  // ---------------------------  Build PDF document  ----------------------- --
   final pdfDoc = pw.Document();
   pdfDoc.addPage(pw.MultiPage(build: (_) => pdfWidgets));
   // ---------------------------  Output file path  ---------------------------
