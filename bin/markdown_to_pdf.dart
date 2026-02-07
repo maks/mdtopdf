@@ -1,4 +1,5 @@
 #!/usr/bin/env dart
+
 /// markdown_to_pdf.dart
 ///
 /// A tiny command‑line utility that:
@@ -12,11 +13,13 @@
 ///   dart run bin/markdown_to_pdf.dart <input.md> [--help]
 ///
 /// Options:
-///   --help        Show this help message and exit.
-///   (No other flags – the new engine is always used as per the request.)
+///   --help                Show this help message and exit.
+///   --code-bg-colour <hex>  Background colour for code blocks (hex, e.g. #f0f0f0).
 import 'dart:io';
+import 'package:args/args.dart';
 import 'package:htmltopdfwidgets/htmltopdfwidgets.dart';
 import 'package:pdf/widgets.dart' as pw;
+
 /// Prints a short help/usage message.
 void printHelp() {
   const usage = '''
@@ -29,13 +32,33 @@ The generated PDF is saved next to the input file with the same base name
 ''';
   stdout.writeln(usage);
 }
+
 Future<void> main(List<String> args) async {
-  // ---------------------------  Argument handling  ---------------------------
-  if (args.isEmpty || args.contains('--help') || args.contains('-h')) {
+  // ----------------- Argument parsing with ArgParser -----------------
+  final parser = ArgParser()
+    ..addFlag('help',
+        abbr: 'h', negatable: false, help: 'Show this help message and exit.')
+    ..addOption('code-bg-colour',
+        help: 'Background colour for code blocks (hex, e.g. #f0f0f0).',
+        valueHelp: '<hex>');
+
+  ArgResults argResults;
+  try {
+    argResults = parser.parse(args);
+  } catch (e) {
+    stderr.writeln('Argument parsing error: $e');
+    stdout.writeln(parser.usage);
+    exit(64);
+  }
+
+  if (argResults['help'] as bool) {
     printHelp();
+    stdout.writeln(parser.usage);
     exit(0);
   }
-  final inputPath = args.first;
+
+  // Retrieve positional arg (input file)
+  final inputPath = argResults.rest.first;
   final inputFile = File(inputPath);
   if (!await inputFile.exists()) {
     stderr.writeln('Error: File not found – $inputPath');
@@ -47,8 +70,8 @@ Future<void> main(List<String> args) async {
   // The `useNewEngine` flag activates the browser‑rendering engine.
   final List<pw.Widget> pdfWidgets;
   try {
-    pdfWidgets = await HTMLToPdf()
-        .convertMarkdown(markdownContent, useNewEngine: true);
+    pdfWidgets =
+        await HTMLToPdf().convertMarkdown(markdownContent, useNewEngine: true);
   } catch (e, st) {
     stderr.writeln('Conversion failed: $e');
     // Optionally you could print the stack trace for debugging:
@@ -59,8 +82,7 @@ Future<void> main(List<String> args) async {
   final pdfDoc = pw.Document();
   pdfDoc.addPage(pw.MultiPage(build: (_) => pdfWidgets));
   // ---------------------------  Output file path  ---------------------------
-  final outputPath = inputFile.parent
-      .uri
+  final outputPath = inputFile.parent.uri
       .resolve('${inputFile.uri.pathSegments.last.split('.').first}.pdf')
       .toFilePath();
   final outputFile = File(outputPath);

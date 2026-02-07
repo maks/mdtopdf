@@ -10,7 +10,7 @@ packages:
     source: hosted
     version: "4.0.7"
   args:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: args
       sha256: d0481093c50b1da8910eb0bb301626d4d8eb7284aa739614d2b394ee09e3ea04
@@ -84,10 +84,11 @@ packages:
   htmltopdfwidgets:
     dependency: "direct main"
     description:
-      name: htmltopdfwidgets
-      sha256: "459e3ffaecaebc5ccb35118eba41898d027a68fe4323aaeb036cbf404fd411a2"
-      url: "https://pub.dev"
-    source: hosted
+      path: "packages/htmltopdfwidgets"
+      ref: add-headers-and-styles
+      resolved-ref: "20f332f0d1cbae26428093406e1612ca99512fff"
+      url: "https://github.com/maks/htmltopdfwidgets"
+    source: git
     version: "2.0.1"
   http:
     dependency: transitive

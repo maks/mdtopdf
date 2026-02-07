@@ -1,10 +1,17 @@
 name: markdown_to_pdf
-description: A simple CLI that converts a Markdown file to a PDF using htmltopdfwidgets (browser engine).
+description: A simple CLI that converts a Markdown file to a PDF in pure Dart
 version: 0.1.0
 environment:
   sdk: ">=2.19.0 <4.0.0"
 dependencies:
   # Core package that does the HTML/Markdown → PDF conversion
-  htmltopdfwidgets: ^2.0.1   # latest version (browser‑rendering engine)
+  htmltopdfwidgets: 
+  #^2.0.1   # latest version (browser‑rendering engine)
+   git:
+      url: https://github.com/maks/htmltopdfwidgets
+      path: packages/htmltopdfwidgets
+      ref: add-headers-and-styles
+  
   # The pdf package is required for Document & MultiPage classes
   pdf: ^3.11.1
+  args: ^2.4.2
